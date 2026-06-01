@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Leaf, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ShoppingBag, MapPin, Grid3x3, Instagram, AtSign, Twitter, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { NepalFlag } from "./NepalFlag";
 
 import pure from "@/assets/matcha-pure.png";
 import strawberry from "@/assets/matcha-strawberry.png";
@@ -9,28 +11,37 @@ import mango from "@/assets/matcha-mango.png";
 import raspberry from "@/assets/matcha-raspberry.png";
 import cherry from "@/assets/matcha-cherry.png";
 
+import fPure from "@/assets/fruit-pure.png";
+import fStrawberry from "@/assets/fruit-strawberry.png";
+import fBlueberry from "@/assets/fruit-blueberry.png";
+import fMango from "@/assets/fruit-mango.png";
+import fRaspberry from "@/assets/fruit-raspberry.png";
+import fCherry from "@/assets/fruit-cherry.png";
+
+import mountains from "@/assets/matcha-mountains.png";
+
 type Flavor = {
   id: string;
   name: string;
-  tagline: string;
-  notes: string;
   price: string;
-  image: string;
-  accent: string; // hex/oklch for chip glow
-  glow: string;
+  cup: string;
+  fruit: string;
 };
 
 const FLAVORS: Flavor[] = [
-  { id: "pure", name: "Pure Matcha", tagline: "Ceremonial Origin", notes: "Stone-ground · Uji, Japan", price: "$8", image: pure, accent: "#a3d977", glow: "oklch(0.82 0.18 135 / 0.45)" },
-  { id: "strawberry", name: "Strawberry", tagline: "Sun-Ripened", notes: "Real strawberry pulp", price: "$9", image: strawberry, accent: "#f5a3b8", glow: "oklch(0.78 0.18 10 / 0.45)" },
-  { id: "blueberry", name: "Blueberry", tagline: "Wild Harvest", notes: "Whole blueberry swirl", price: "$9", image: blueberry, accent: "#8a6dc9", glow: "oklch(0.55 0.2 295 / 0.5)" },
-  { id: "mango", name: "Mango", tagline: "Golden Hour", notes: "Alphonso mango puree", price: "$9", image: mango, accent: "#f2b84b", glow: "oklch(0.82 0.18 80 / 0.5)" },
-  { id: "raspberry", name: "Raspberry", tagline: "Garden Crush", notes: "Crushed raspberry seeds", price: "$9", image: raspberry, accent: "#e85a7a", glow: "oklch(0.65 0.22 0 / 0.5)" },
-  { id: "cherry", name: "Cherry", tagline: "Midnight Bloom", notes: "Dark cherry conserve", price: "$10", image: cherry, accent: "#c43a4e", glow: "oklch(0.5 0.22 20 / 0.55)" },
+  { id: "cherry", name: "Cherry", price: "$18.20", cup: cherry, fruit: fCherry },
+  { id: "raspberry", name: "Raspberry", price: "$18.50", cup: raspberry, fruit: fRaspberry },
+  { id: "strawberry", name: "Strawberry", price: "$18.99", cup: strawberry, fruit: fStrawberry },
+  { id: "blueberry", name: "Blueberry", price: "$19.33", cup: blueberry, fruit: fBlueberry },
+  { id: "mango", name: "Mango", price: "$19.50", cup: mango, fruit: fMango },
+  { id: "pure", name: "Pure Matcha", price: "$17.50", cup: pure, fruit: fPure },
 ];
 
+// Order cards visually so selected is centered behind the cup (3 left, 3 right)
+// Active index governs which appears closest. We'll position by signed slot.
+
 export function MatchaStation() {
-  const [activeId, setActiveId] = useState<string>("pure");
+  const [activeId, setActiveId] = useState<string>("blueberry");
   const [cart, setCart] = useState(0);
 
   const activeIndex = useMemo(() => FLAVORS.findIndex((f) => f.id === activeId), [activeId]);
@@ -41,203 +52,183 @@ export function MatchaStation() {
     setActiveId(FLAVORS[next].id);
   };
 
+  // For arc: compute signed position relative to active flavor (-3..-1, 1..3)
+  const arcPositions = useMemo(() => {
+    const others = FLAVORS.filter((f) => f.id !== activeId);
+    // Split into 3 left, 3 right
+    return others.map((f, i) => {
+      const side = i < others.length / 2 ? -1 : 1;
+      const slot = side === -1 ? -(i + 1) : i - others.length / 2 + 1;
+      return { flavor: f, slot };
+    });
+  }, [activeId]);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      {/* Floating particles */}
-      <Particles />
-
       {/* Header */}
       <header className="sticky top-0 z-50 px-4 sm:px-8 py-4">
-        <div className="glass mx-auto flex max-w-7xl items-center justify-between rounded-full px-4 sm:px-6 py-3">
-          <a href="/" className="flex items-center gap-2 text-foreground">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground">
-              <Leaf className="h-4 w-4" />
-            </span>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          {/* Brand */}
+          <a href="/" className="flex items-center gap-2 text-foreground shrink-0">
+            <NepalFlag className="h-7 w-auto drop-shadow-md" />
             <span className="font-display text-xl sm:text-2xl font-semibold tracking-tight">
               Matcha Station
             </span>
           </a>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#flavors" className="hover:text-foreground transition">Flavors</a>
-            <a href="#story" className="hover:text-foreground transition">Story</a>
-            <a href="#ritual" className="hover:text-foreground transition">Ritual</a>
+
+          {/* Center icon nav */}
+          <nav className="glass hidden sm:flex items-center gap-1 rounded-full px-2 py-1.5">
+            {[Grid3x3, Instagram, AtSign, Twitter, ShoppingBag].map((Icon, i) => (
+              <button
+                key={i}
+                onClick={() => Icon === ShoppingBag && setCart((c) => c + 1)}
+                className={`grid h-9 w-9 place-items-center rounded-full transition ${
+                  Icon === ShoppingBag
+                    ? "bg-foreground/15 text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                }`}
+                aria-label={Icon.displayName ?? "nav"}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
           </nav>
+
+          {/* Right location pill */}
           <button
             onClick={() => setCart((c) => c + 1)}
-            className="relative inline-flex items-center gap-2 rounded-full bg-foreground/10 hover:bg-foreground/15 transition px-4 py-2 text-sm font-medium"
+            className="glass grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Location"
           >
-            <ShoppingBag className="h-4 w-4" />
-            <span className="hidden sm:inline">Cart</span>
-            <span className="grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-              {cart}
-            </span>
+            <MapPin className="h-4 w-4" />
           </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative px-4 sm:px-8 pt-6 sm:pt-12 pb-24">
-        <div className="mx-auto max-w-7xl">
-          {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              Ceremonial Grade · Uji, Japan
-            </span>
-          </motion.div>
+      {/* Hero stage */}
+      <section className="relative px-2 sm:px-6 pt-6 sm:pt-10 pb-8">
+        <div className="relative mx-auto max-w-7xl">
+          <div className="relative h-[78vh] min-h-[560px] sm:min-h-[640px] lg:min-h-[720px] w-full">
+            {/* Glow behind cup */}
+            <motion.div
+              key={active.id + "-halo"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[60%] h-[420px] w-[420px] sm:h-[560px] sm:w-[560px] rounded-full blur-3xl"
+              style={{
+                background: "radial-gradient(circle, oklch(0.7 0.2 135 / 0.35), transparent 65%)",
+              }}
+            />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="mt-6 font-display text-center text-5xl sm:text-7xl lg:text-8xl font-light leading-[1.05] tracking-tight"
-          >
-            Crafted matcha,
-            <br />
-            <span className="italic text-gradient">reimagined.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mx-auto mt-6 max-w-xl text-center text-base sm:text-lg text-muted-foreground"
-          >
-            Six signature drinks. Stone-ground matcha, layered with real fruit.
-            Choose your ritual.
-          </motion.p>
-
-          {/* Stage with cup + side cards */}
-          <div className="relative mt-10 sm:mt-16">
-            {/* Desktop side flavor cards (arc) */}
-            <div className="pointer-events-none hidden lg:block">
-              {FLAVORS.map((f, i) => {
-                // Position: 3 on left, 3 on right
-                const isLeft = i < 3;
-                const slot = isLeft ? i : i - 3; // 0,1,2
-                const top = `${15 + slot * 28}%`;
-                const side = isLeft ? { left: "2%" } : { right: "2%" };
-                // arc offset
-                const offset = slot === 1 ? 60 : 0;
-                const sideOffset = isLeft
-                  ? { left: `calc(2% + ${offset}px)` }
-                  : { right: `calc(2% + ${offset}px)` };
-                return (
-                  <div
-                    key={f.id}
-                    className="pointer-events-auto absolute w-64"
-                    style={{ top, ...sideOffset }}
-                  >
-                    <FlavorCard
-                      flavor={f}
-                      active={f.id === activeId}
-                      onClick={() => setActiveId(f.id)}
-                    />
-                  </div>
-                );
-              })}
+            {/* Arc of flavor cards (desktop & tablet) */}
+            <div className="absolute inset-0 hidden md:block pointer-events-none">
+              {arcPositions.map(({ flavor, slot }) => (
+                <ArcCard
+                  key={flavor.id}
+                  flavor={flavor}
+                  slot={slot}
+                  onClick={() => setActiveId(flavor.id)}
+                />
+              ))}
             </div>
 
-            {/* Cup */}
-            <div className="relative mx-auto h-[480px] sm:h-[560px] lg:h-[640px] w-full max-w-md flex items-center justify-center">
-              {/* Glow halo */}
-              <motion.div
-                key={active.id + "-halo"}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0 rounded-full blur-3xl"
-                style={{
-                  background: `radial-gradient(circle at 50% 45%, ${active.glow}, transparent 60%)`,
-                }}
-              />
-              {/* Floor shadow */}
-              <div
-                className="absolute bottom-6 left-1/2 -translate-x-1/2 h-10 w-3/4 rounded-[50%] blur-2xl"
-                style={{ background: "oklch(0 0 0 / 0.55)" }}
-              />
+            {/* Mountains base */}
+            <img
+              src={mountains}
+              alt=""
+              aria-hidden
+              className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[200%] max-w-none sm:w-[160%] lg:w-[130%] pointer-events-none select-none opacity-95 z-10"
+              style={{ filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.5))" }}
+            />
 
+            {/* The cup */}
+            <div className="absolute left-1/2 bottom-[22%] sm:bottom-[24%] -translate-x-1/2 z-20 h-[60%] sm:h-[65%] w-[60%] sm:w-[40%] lg:w-[30%] max-w-[360px] flex items-end justify-center">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={active.id}
-                  src={active.image}
-                  alt={`${active.name} matcha drink in a tall glass`}
+                  src={active.cup}
+                  alt={`${active.name} matcha drink`}
                   width={1024}
                   height={1024}
-                  initial={{ opacity: 0, y: 30, scale: 0.96, filter: "blur(8px)" }}
+                  initial={{ opacity: 0, y: 40, scale: 0.94, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -20, scale: 0.98, filter: "blur(8px)" }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative z-10 h-full w-auto object-contain drop-shadow-[0_40px_50px_rgba(0,0,0,0.6)]"
+                  exit={{ opacity: 0, y: -20, scale: 0.96, filter: "blur(10px)" }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  className="h-full w-full object-contain drop-shadow-[0_50px_40px_rgba(0,0,0,0.7)]"
                   style={{ animation: "float 6s ease-in-out infinite" }}
                 />
               </AnimatePresence>
             </div>
 
-            {/* Flavor info panel below cup */}
+            {/* Flavor name floating on cup */}
             <motion.div
-              key={active.id + "-info"}
-              initial={{ opacity: 0, y: 20 }}
+              key={active.id + "-label"}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="relative z-20 mx-auto mt-4 sm:mt-2 max-w-md text-center"
+              transition={{ duration: 0.45, delay: 0.15 }}
+              className="absolute left-1/2 bottom-[30%] sm:bottom-[32%] -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap"
             >
-              <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                {active.tagline}
-              </p>
-              <h2 className="mt-2 font-display text-3xl sm:text-4xl">{active.name}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{active.notes}</p>
-              <div className="mt-5 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => setCart((c) => c + 1)}
-                  className="rounded-full bg-primary text-primary-foreground px-6 py-3 text-sm font-semibold shadow-[var(--shadow-glow)] hover:scale-[1.03] transition-transform"
-                >
-                  Add to cart — {active.price}
-                </button>
-                <span className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
-                  <Star className="h-3.5 w-3.5 fill-primary text-primary" /> 4.9 · 2.1k
-                </span>
-              </div>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-foreground/95 drop-shadow-[0_4px_18px_rgba(0,0,0,0.8)]">
+                {active.name}
+              </h2>
             </motion.div>
+
+            {/* Add to cart pill */}
+            <motion.div
+              key={active.id + "-cta"}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="absolute left-1/2 bottom-[10%] sm:bottom-[12%] -translate-x-1/2 z-30"
+            >
+              <button
+                onClick={() => setCart((c) => c + 1)}
+                className="glass hover:bg-foreground/15 transition flex items-center gap-3 rounded-full pl-4 pr-5 py-2.5 text-sm font-medium shadow-[var(--shadow-glow)]"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Add to cart</span>
+                <span className="text-muted-foreground">|</span>
+                <span className="font-semibold">{active.price}</span>
+              </button>
+            </motion.div>
+
+            {/* Mobile-only side nav arrows */}
+            <div className="md:hidden absolute inset-x-0 top-1/2 -translate-y-1/2 z-30 flex justify-between px-2 pointer-events-none">
+              <button
+                onClick={() => go(-1)}
+                className="pointer-events-auto glass grid h-10 w-10 place-items-center rounded-full"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => go(1)}
+                className="pointer-events-auto glass grid h-10 w-10 place-items-center rounded-full"
+                aria-label="Next"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Mobile/tablet swipeable carousel */}
-          <div id="flavors" className="lg:hidden mt-10">
-            <div className="flex items-center justify-between mb-3 px-1">
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Choose your flavor
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => go(-1)}
-                  aria-label="Previous flavor"
-                  className="glass rounded-full p-2 hover:bg-foreground/10"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => go(1)}
-                  aria-label="Next flavor"
-                  className="glass rounded-full p-2 hover:bg-foreground/10"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+          {/* Headline below stage */}
+          <div className="text-center mt-2 sm:mt-4 px-4">
+            <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-light text-foreground">
+              Choose your <span className="italic text-gradient">matcha tea</span>
+            </h1>
+          </div>
+
+          {/* Mobile swipe carousel */}
+          <div className="md:hidden mt-6">
             <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-4 scrollbar-hide">
               {FLAVORS.map((f) => (
-                <div key={f.id} className="snap-center shrink-0 w-[70vw] sm:w-64">
-                  <FlavorCard
-                    flavor={f}
-                    active={f.id === activeId}
-                    onClick={() => setActiveId(f.id)}
-                  />
-                </div>
+                <MobileFlavorCard
+                  key={f.id}
+                  flavor={f}
+                  active={f.id === activeId}
+                  onClick={() => setActiveId(f.id)}
+                />
               ))}
             </div>
           </div>
@@ -245,19 +236,19 @@ export function MatchaStation() {
       </section>
 
       {/* Story strip */}
-      <section id="story" className="px-4 sm:px-8 py-20 sm:py-28">
+      <section className="relative px-4 sm:px-8 py-20 sm:py-28">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-primary">The Ritual</p>
-          <h3 className="mt-4 font-display text-4xl sm:text-5xl">
+          <h3 className="mt-4 font-display text-3xl sm:text-5xl">
             Stone-ground. Hand-whisked.
             <br />
             <span className="italic text-muted-foreground">Served cold.</span>
           </h3>
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { t: "Single Origin", d: "First-harvest tencha from Uji, Japan." },
+              { t: "Himalayan Origin", d: "Crafted with care from the foothills of Nepal." },
               { t: "Real Fruit", d: "Cold-pressed purees. No syrups, no shortcuts." },
-              { t: "Crafted Daily", d: "Whisked to order. Layered with intent." },
+              { t: "Whisked Daily", d: "Built to order. Layered with intent." },
             ].map((item) => (
               <div key={item.t} className="glass rounded-3xl p-6 text-left">
                 <p className="font-display text-2xl">{item.t}</p>
@@ -268,17 +259,65 @@ export function MatchaStation() {
         </div>
       </section>
 
-      <footer id="ritual" className="border-t border-white/5 px-4 sm:px-8 py-10">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Matcha Station. Brewed with care.</p>
-          <p>Uji · Kyoto · Worldwide</p>
+      <footer className="border-t border-white/5 px-4 sm:px-8 py-8">
+        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <NepalFlag className="h-5 w-auto" />
+            <span>© {new Date().getFullYear()} Matcha Station — Brewed in Nepal.</span>
+          </div>
+          <span>Cart: {cart} item{cart === 1 ? "" : "s"}</span>
         </div>
       </footer>
     </div>
   );
 }
 
-function FlavorCard({
+function ArcCard({
+  flavor,
+  slot,
+  onClick,
+}: {
+  flavor: Flavor;
+  slot: number; // -3..-1 or 1..3
+  onClick: () => void;
+}) {
+  // Closer to center => larger, less tilted. Outer => smaller, more tilted.
+  const abs = Math.abs(slot);
+  const side = slot < 0 ? -1 : 1;
+  // Horizontal offset from center as % of stage width
+  const x = side * (10 + abs * 11); // 10,21,32 %
+  // Vertical lift (closer to cup -> higher)
+  const y = -8 - (3 - abs) * 6; // px offset baseline
+  const rotate = side * (8 + abs * 4);
+  const scale = 1 - (abs - 1) * 0.1;
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={{ opacity: 1, scale }}
+      transition={{ type: "spring", stiffness: 220, damping: 22 }}
+      onClick={onClick}
+      className="pointer-events-auto absolute z-10 group"
+      style={{
+        left: `calc(50% + ${x}%)`,
+        bottom: `calc(28% + ${-y}px)`,
+        transform: `translateX(-50%) rotate(${rotate}deg)`,
+      }}
+      whileHover={{ scale: scale * 1.06, y: -6 }}
+    >
+      <div className="relative w-28 lg:w-32 aspect-square rounded-3xl bg-[oklch(0.95_0.02_90)] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-black/5 grid place-items-center overflow-hidden">
+        <img
+          src={flavor.fruit}
+          alt={flavor.name}
+          loading="lazy"
+          className="h-3/4 w-3/4 object-contain drop-shadow-md"
+        />
+      </div>
+    </motion.button>
+  );
+}
+
+function MobileFlavorCard({
   flavor,
   active,
   onClick,
@@ -290,63 +329,14 @@ function FlavorCard({
   return (
     <motion.button
       onClick={onClick}
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.96 }}
       animate={{ scale: active ? 1.05 : 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
-      className={`group relative w-full text-left rounded-2xl p-4 transition-all duration-300 ${
-        active
-          ? "glass shadow-[var(--shadow-glow)]"
-          : "glass opacity-80 hover:opacity-100"
+      className={`snap-center shrink-0 w-24 aspect-square rounded-3xl grid place-items-center bg-[oklch(0.95_0.02_90)] shadow-[0_15px_30px_-10px_rgba(0,0,0,0.6)] ring-1 transition ${
+        active ? "ring-primary" : "ring-black/5"
       }`}
-      style={
-        active
-          ? { boxShadow: `0 20px 50px -10px ${flavor.glow}, inset 0 0 0 1px ${flavor.accent}55` }
-          : undefined
-      }
     >
-      <div className="flex items-center gap-3">
-        <span
-          className="h-9 w-9 rounded-full ring-2 ring-white/10 shrink-0"
-          style={{
-            background: `radial-gradient(circle at 30% 30%, ${flavor.accent}, oklch(0.2 0.05 150))`,
-          }}
-        />
-        <div className="min-w-0">
-          <p className="font-display text-lg leading-tight truncate">{flavor.name}</p>
-          <p className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground truncate">
-            {flavor.tagline}
-          </p>
-        </div>
-        <span className="ml-auto text-sm text-muted-foreground">{flavor.price}</span>
-      </div>
+      <img src={flavor.fruit} alt={flavor.name} className="h-3/4 w-3/4 object-contain" />
     </motion.button>
-  );
-}
-
-function Particles() {
-  const items = Array.from({ length: 14 });
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-      {items.map((_, i) => {
-        const left = (i * 37) % 100;
-        const delay = (i * 1.3) % 12;
-        const dur = 14 + (i % 5) * 3;
-        const size = 3 + (i % 4);
-        return (
-          <span
-            key={i}
-            className="absolute bottom-0 rounded-full bg-primary/40"
-            style={{
-              left: `${left}%`,
-              width: size,
-              height: size,
-              filter: "blur(1px)",
-              animation: `particle-rise ${dur}s linear ${delay}s infinite`,
-            }}
-          />
-        );
-      })}
-    </div>
   );
 }
