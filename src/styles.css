@@ -62,26 +62,35 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 1rem;
+  /* Matcha Station — dark cinematic green */
+  --background: oklch(0.18 0.04 150);
+  --foreground: oklch(0.97 0.02 110);
+  --card: oklch(0.22 0.045 150);
+  --card-foreground: oklch(0.97 0.02 110);
+  --popover: oklch(0.22 0.045 150);
+  --popover-foreground: oklch(0.97 0.02 110);
+  --primary: oklch(0.82 0.18 135);
+  --primary-foreground: oklch(0.18 0.04 150);
+  --secondary: oklch(0.28 0.05 150);
+  --secondary-foreground: oklch(0.97 0.02 110);
+  --muted: oklch(0.26 0.04 150);
+  --muted-foreground: oklch(0.72 0.04 130);
+  --accent: oklch(0.7 0.16 135);
+  --accent-foreground: oklch(0.15 0.04 150);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 110);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.82 0.18 135);
+  --glass: oklch(1 0 0 / 6%);
+  --glass-border: oklch(1 0 0 / 14%);
+  --gradient-bg: radial-gradient(ellipse at 20% 10%, oklch(0.32 0.09 145) 0%, transparent 55%),
+                 radial-gradient(ellipse at 85% 90%, oklch(0.28 0.08 160) 0%, transparent 60%),
+                 linear-gradient(180deg, oklch(0.14 0.04 150) 0%, oklch(0.1 0.03 155) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.85 0.18 135), oklch(0.7 0.18 145));
+  --shadow-glow: 0 30px 80px -20px oklch(0.7 0.2 135 / 35%);
+  --shadow-cup: 0 60px 60px -30px oklch(0 0 0 / 70%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -138,7 +147,39 @@
   }
 
   body {
-    background-color: var(--color-background);
+    background: var(--gradient-bg);
+    background-attachment: fixed;
     color: var(--color-foreground);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--glass-border);
+  }
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .font-display {
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes particle-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
 }
