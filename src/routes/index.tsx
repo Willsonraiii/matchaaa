@@ -1,29 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { MatchaStation } from "@/components/MatchaStation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Matcha Station — Crafted Matcha, Reimagined" },
+      { name: "description", content: "Premium ceremonial-grade matcha drinks crafted with real fruit. Six signature flavors — Pure, Strawberry, Blueberry, Mango, Raspberry, Cherry." },
+      { property: "og:title", content: "Matcha Station — Crafted Matcha, Reimagined" },
+      { property: "og:description", content: "Six signature matcha drinks. Stone-ground, layered with real fruit." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return <MatchaStation />;
 }
