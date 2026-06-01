@@ -138,12 +138,12 @@ export function MatchaStation() {
               src={mountains}
               alt=""
               aria-hidden
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[140%] max-w-none sm:w-[120%] lg:w-[110%] pointer-events-none select-none opacity-95"
+              className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[200%] max-w-none sm:w-[160%] lg:w-[130%] pointer-events-none select-none opacity-95 z-10"
               style={{ filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.5))" }}
             />
 
             {/* The cup */}
-            <div className="absolute left-1/2 bottom-[18%] sm:bottom-[20%] -translate-x-1/2 z-20 h-[55%] sm:h-[60%] flex items-end justify-center">
+            <div className="absolute left-1/2 bottom-[22%] sm:bottom-[24%] -translate-x-1/2 z-20 h-[60%] sm:h-[65%] w-[60%] sm:w-[40%] lg:w-[30%] max-w-[360px] flex items-end justify-center">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={active.id}
@@ -155,7 +155,7 @@ export function MatchaStation() {
                   animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: -20, scale: 0.96, filter: "blur(10px)" }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="h-full w-auto object-contain drop-shadow-[0_50px_40px_rgba(0,0,0,0.7)]"
+                  className="h-full w-full object-contain drop-shadow-[0_50px_40px_rgba(0,0,0,0.7)]"
                   style={{ animation: "float 6s ease-in-out infinite" }}
                 />
               </AnimatePresence>
@@ -167,7 +167,7 @@ export function MatchaStation() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.15 }}
-              className="absolute left-1/2 bottom-[33%] sm:bottom-[35%] -translate-x-1/2 z-30 pointer-events-none"
+              className="absolute left-1/2 bottom-[30%] sm:bottom-[32%] -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap"
             >
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-foreground/95 drop-shadow-[0_4px_18px_rgba(0,0,0,0.8)]">
                 {active.name}
