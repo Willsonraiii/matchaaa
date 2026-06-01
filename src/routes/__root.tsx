@@ -80,10 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Matcha Station — Crafted Matcha, Reimagined" },
       { name: "description", content: "Premium ceremonial-grade matcha drinks crafted with real fruit. Six signature flavors. Pure indulgence." },
       { property: "og:title", content: "Matcha Station — Crafted Matcha, Reimagined" },
-      { property: "og:description", content: "Premium ceremonial-grade matcha drinks crafted with real fruit. Six signature flavors." },
+      { property: "og:description", content: "Premium ceremonial-grade matcha drinks crafted with real fruit. Six signature flavors. Pure indulgence." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Matcha Station — Crafted Matcha, Reimagined" },
+      { name: "twitter:description", content: "Premium ceremonial-grade matcha drinks crafted with real fruit. Six signature flavors. Pure indulgence." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/49566750-0b35-4763-a675-1269fd143b7d/id-preview-ad049e3c--350d33f2-6f43-4896-879b-77e2c9d446ac.lovable.app-1780320922992.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/49566750-0b35-4763-a675-1269fd143b7d/id-preview-ad049e3c--350d33f2-6f43-4896-879b-77e2c9d446ac.lovable.app-1780320922992.png" },
     ],
     links: [
       {
